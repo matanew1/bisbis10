@@ -1,13 +1,12 @@
 package com.att.tdp.bisbis10.controller;
 
-
+import com.att.tdp.bisbis10.bondary.RatingBoundary;
 import com.att.tdp.bisbis10.dal.RatingCrud;
 import com.att.tdp.bisbis10.dal.RestaurantCrud;
-import com.att.tdp.bisbis10.bondary.RatingBoundary;
 import com.att.tdp.bisbis10.data.RatingEntity;
 import com.att.tdp.bisbis10.data.RestaurantEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,33 +24,37 @@ public class RatingsController {
 
     @Autowired
     private RestaurantCrud restaurantCrud;
-    @Autowired
-    private ServerProperties serverProperties;
-
 
     @PostMapping(
             path = "/ratings",
             consumes = "application/json",
             produces = "application/json"
     )
-    public ResponseEntity<RatingEntity> addNewRating(@RequestBody RatingBoundary ratingBoundary) {
-        // Convert RatingBoundary to RatingEntity
-        RatingEntity ratingEntity = ratingBoundary.toEntity();
+    public ResponseEntity<?> addNewRating(@RequestBody RatingBoundary ratingBoundary) {
+        try {
+            // Validate rating value
+            float ratingValue = ratingBoundary.getRating();
+            if (ratingValue < 0 || ratingValue > 5) {
+                return ResponseEntity.badRequest().body("Invalid rating value: must be between 0 and 5.");
+            }
 
-        // Find the restaurant
-        Optional<RestaurantEntity> restaurantEntity = restaurantCrud.findById(ratingBoundary.getRestaurantId());
-        if (restaurantEntity.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            // Find the restaurant
+            Optional<RestaurantEntity> restaurantEntityOptional = restaurantCrud.findById(ratingBoundary.getRestaurantId());
+            if (restaurantEntityOptional.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Create RatingEntity from RatingBoundary
+            RatingEntity ratingEntity = new RatingEntity();
+            ratingEntity.setRating(ratingValue);
+            ratingEntity.setRestaurant(restaurantEntityOptional.get());
+
+            // Save the rating
+            RatingEntity savedRating = ratingCrud.save(ratingEntity);
+
+            return ResponseEntity.ok(savedRating);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add rating: " + e.getMessage());
         }
-
-        // Set the restaurant
-        ratingEntity.setRestaurant(restaurantEntity.get());
-
-        // Return all ratings
-        return ResponseEntity.ok(ratingCrud.save(ratingEntity));
-
     }
-
-
 }
-
