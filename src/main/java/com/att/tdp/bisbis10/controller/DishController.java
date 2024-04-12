@@ -69,7 +69,6 @@ public class DishController {
         return ResponseEntity.ok(dishEntity);
     }
 
-
     @DeleteMapping(
             path = "/restaurants/{restaurantId}/dishes/{dishId}"
     )

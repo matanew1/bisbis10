@@ -3,34 +3,28 @@ DROP TABLE IF EXISTS restaurant_cuisines CASCADE ;
 DROP TABLE IF EXISTS restaurant_ratings CASCADE ;
 DROP TABLE IF EXISTS dishes CASCADE ;
 DROP TABLE IF EXISTS restaurants CASCADE ;
+DROP TABLE IF EXISTS orders CASCADE ;
+DROP TABLE IF EXISTS order_items CASCADE ;
 
 -- Create tables
 CREATE TABLE restaurants (
                              id SERIAL PRIMARY KEY,
                              name VARCHAR(255),
-                             is_kosher BOOLEAN,
-                             UNIQUE (name),
-                             CHECK (name IS NOT NULL),
-                             CHECK (is_kosher IS NOT NULL)
+                             is_kosher BOOLEAN
 );
 
 CREATE TABLE restaurant_ratings (
                                     id SERIAL PRIMARY KEY,
                                     restaurant_id INTEGER,
                                     rating FLOAT,
-                                    CHECK (rating >= 0 AND rating <= 5),
-                                    CHECK (rating IS NOT NULL),
-                                    CHECK (restaurant_id IS NOT NULL)
+                                    FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
 );
 
 
 CREATE TABLE restaurant_cuisines (
                                      restaurant_id INTEGER,
                                      cuisine VARCHAR(255),
-                                     FOREIGN KEY (restaurant_id) REFERENCES restaurants(id),
-                                     UNIQUE (restaurant_id, cuisine),
-                                     CHECK (restaurant_id IS NOT NULL),
-                                     CHECK (cuisine IS NOT NULL)
+                                     FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
 );
 
 CREATE TABLE dishes (
@@ -39,11 +33,23 @@ CREATE TABLE dishes (
                         name VARCHAR(255) NOT NULL,
                         description TEXT,
                         price DECIMAL(10, 2) NOT NULL,
-                        FOREIGN KEY (restaurant_id) REFERENCES restaurants(id),
-                        UNIQUE (restaurant_id, name),
-                        CHECK (restaurant_id IS NOT NULL),
-                        CHECK (name IS NOT NULL),
-                        CHECK (price IS NOT NULL)
+                        FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+);
+
+CREATE TABLE orders (
+                        id SERIAL PRIMARY KEY,
+                        restaurant_id INT NOT NULL,
+                        FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+
+);
+
+CREATE TABLE order_items (
+                            id SERIAL PRIMARY KEY,
+                            order_id INT NOT NULL,
+                            dish_id INT NOT NULL,
+                            amount INT NOT NULL,
+                            FOREIGN KEY (order_id) REFERENCES orders(id),
+                            FOREIGN KEY (dish_id) REFERENCES dishes(id)
 );
 
 -- Insert data
@@ -65,3 +71,9 @@ SELECT * FROM restaurants
                   INNER JOIN dishes d on restaurants.id = d.restaurant_id
                   INNER JOIN restaurant_ratings r on restaurants.id = r.restaurant_id
                   INNER JOIN restaurant_cuisines c on restaurants.id = c.restaurant_id;
+
+
+SELECT order_id, amount, dish_id, d.restaurant_id FROM orders
+                  INNER JOIN order_items oi on orders.id = oi.order_id
+                  INNER JOIN dishes d on oi.dish_id = d.id
+                  INNER JOIN restaurants r on orders.restaurant_id = r.id;
