@@ -1,6 +1,8 @@
 package com.att.tdp.bisbis10.controller;
 
 import com.att.tdp.bisbis10.bondary.OrderBoundary;
+import com.att.tdp.bisbis10.bondary.OrderItemBoundary;
+import com.att.tdp.bisbis10.dal.DishCrud;
 import com.att.tdp.bisbis10.dal.OrderCrud;
 import com.att.tdp.bisbis10.dal.OrderItemCrud;
 import com.att.tdp.bisbis10.data.OrderEntity;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Controller
@@ -23,6 +26,8 @@ public class OrderController {
 
     @Autowired
     private OrderItemCrud orderItemCrud;
+    @Autowired
+    private DishCrud dishCrud;
 
     @PostMapping(
             path = "/order",
@@ -30,21 +35,36 @@ public class OrderController {
             produces = "application/json"
     )
     public ResponseEntity<OrderEntity> addOrder(@RequestBody OrderBoundary orderBoundary) {
-        // Create and save the OrderEntity
-        OrderEntity orderEntity = orderBoundary.toEntity();
-        // Save the OrderEntity
-        orderEntity = orderCrud.save(orderEntity);
+        int restaurantId = orderBoundary.getRestaurantId();
+        OrderItemBoundary[] orderItems = orderBoundary.getOrderItems();
 
-        // Retrieve the list of OrderItemEntities from the OrderBoundary
-        List<OrderItemEntity> orderItems = orderBoundary.getItems();
-        // Iterate through the OrderItemEntities and set the reference to the OrderEntity
-        for (OrderItemEntity orderItem : orderItems) {
-            // Ensure the OrderEntity reference is set
-            orderItem.setOrder(orderEntity);
-            // Save each OrderItemEntity
-            orderItemCrud.save(orderItem);
+        if (restaurantId == 0 || orderItems == null || orderItems.length == 0) {
+            return ResponseEntity.badRequest().build();
         }
 
+        for (OrderItemBoundary orderItem : orderItems) {
+            if (orderItem.getAmount() < 0 || orderItem.getDishId() == 0 ) {
+                return ResponseEntity.badRequest().build();
+            }
+            // if order.getRestaurantId() not exist in the database
+            int dishId = orderItem.getDishId();
+
+            // if dishId not exist in the database
+            if (dishCrud.findById(dishId).isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+        }
+
+        OrderEntity orderEntity = orderBoundary.toEntity();
+        orderEntity = orderCrud.save(orderEntity);
+
+        List<OrderItemEntity> orderItemEntities = orderBoundary.toEntity(orderEntity);
+        orderItemEntities = orderItemCrud.saveAll(orderItemEntities);
+
+        orderEntity.setItems(orderItemEntities);
+
         return ResponseEntity.ok(orderEntity);
+
     }
+
 }

@@ -9,17 +9,27 @@ import java.util.List;
 public class OrderBoundary {
 
     private int restaurantId;
-    private List<OrderItemEntity> orderItems = new ArrayList<>();
+    private OrderItemBoundary[] orderItems;
 
-    public OrderBoundary() {
-    }
-
-    public OrderBoundary(int restaurantId, List<OrderItemEntity> items) {
+    public OrderBoundary(int restaurantId, OrderItemBoundary[] items) {
         this.restaurantId = restaurantId;
         this.orderItems = items;
     }
 
-    // Getters and setters
+    public OrderEntity toEntity() {
+        OrderEntity orderEntity = new OrderEntity();
+        orderEntity.setRestaurantId(this.restaurantId);
+        return orderEntity;
+    }
+
+    public OrderItemBoundary[] getOrderItems() {
+        return orderItems;
+    }
+
+    public void setOrderItems(OrderItemBoundary[] orderItems) {
+        this.orderItems = orderItems;
+    }
+
     public int getRestaurantId() {
         return restaurantId;
     }
@@ -28,22 +38,17 @@ public class OrderBoundary {
         this.restaurantId = restaurantId;
     }
 
-    public List<OrderItemEntity> getItems() {
-        return orderItems;
-    }
-
-    public void setItems(List<OrderItemEntity> items) {
-        this.orderItems = items;
-    }
-
-    public OrderEntity toEntity() {
-        OrderEntity order = new OrderEntity();
-        order.setRestaurantId(this.restaurantId);
-        // Set the order reference for each order item
-        for (OrderItemEntity item : this.orderItems) {
-            item.setOrder(order);
+    public List<OrderItemEntity> toEntity(OrderEntity orderEntity) {
+        List<OrderItemEntity> orderItemEntities = new ArrayList<>();
+        for (OrderItemBoundary orderItem : this.orderItems) {
+            OrderItemEntity orderItemEntity = orderItem.toEntity();
+            orderItemEntity.setOrder(orderEntity);
+            orderItemEntities.add(orderItemEntity);
         }
-        order.setItems(this.orderItems);
-        return order;
+        return orderItemEntities;
     }
+
+
+
+
 }

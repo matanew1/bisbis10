@@ -18,18 +18,23 @@ public class RestaurantController {
     private RestaurantCrud restaurantCrud;
 
     @GetMapping("/restaurants")
-    public @ResponseBody Iterable<RestaurantEntity> getRestaurantsByCuisine(@RequestParam(required = false) String cuisine) {
+    public ResponseEntity<Iterable<RestaurantEntity>>  getRestaurantsByCuisine(@RequestParam(required = false) String cuisine) {
         if (cuisine != null && !cuisine.isEmpty()) {
-            return restaurantCrud.findByCuisinesContaining(cuisine);
+            return ResponseEntity.ok(restaurantCrud.findByCuisinesContaining(cuisine));
         } else {
             // If cuisine parameter is not provided, return all restaurants
-            return restaurantCrud.findAll();
+            return ResponseEntity.ok(restaurantCrud.findAll());
         }
     }
 
     @GetMapping("/restaurants/{id}")
-    public @ResponseBody RestaurantEntity getRestaurantById(@PathVariable Integer id) {
-        return restaurantCrud.findById(id).orElse(null);
+    public ResponseEntity<RestaurantEntity> getRestaurantById(@PathVariable Integer id) {
+        RestaurantEntity restaurant = restaurantCrud.findById(id).orElse(null);
+        if (restaurant == null) {
+            // 404 Not Found
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(restaurant);
     }
 
     @PostMapping(
@@ -81,7 +86,7 @@ public class RestaurantController {
     }
 
     @DeleteMapping("/restaurants/{id}")
-    public ResponseEntity deleteRestaurant(@PathVariable Integer id) {
+    public ResponseEntity<Void> deleteRestaurant(@PathVariable Integer id) {
         if (!restaurantCrud.existsById(id)) {
             // 404 Not Found
             return ResponseEntity.notFound().build();

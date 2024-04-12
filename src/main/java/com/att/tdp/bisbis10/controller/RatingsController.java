@@ -37,7 +37,6 @@ public class RatingsController {
     public ResponseEntity<RatingEntity> addNewRating(@RequestBody RatingBoundary ratingBoundary) {
         // Convert RatingBoundary to RatingEntity
         RatingEntity ratingEntity = ratingBoundary.toEntity();
-        System.err.println("ratingEntity: " + ratingEntity);
 
         // Find the restaurant
         Optional<RestaurantEntity> restaurantEntity = restaurantCrud.findById(ratingBoundary.getRestaurantId());

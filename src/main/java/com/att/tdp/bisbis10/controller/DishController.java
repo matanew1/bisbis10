@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -88,11 +89,11 @@ public class DishController {
             path = "/restaurants/{id}/dishes",
             produces = "application/json"
     )
-    public ResponseEntity<DishEntity[]> getDishesByRestaurantId(@PathVariable("id") Integer restaurantId) {
+    public ResponseEntity<List<DishEntity>> getDishesByRestaurantId(@PathVariable("id") Integer restaurantId) {
         Optional<RestaurantEntity> restaurant = restaurantCrud.findById(restaurantId);
 
         return restaurant
-                .map(restaurantEntity -> ResponseEntity.ok(dishCrud.findByRestaurant(restaurantEntity)))
+                .map(value -> ResponseEntity.ok(value.getDishes()))
                 .orElseGet(() -> ResponseEntity.notFound().build());
 
     }

@@ -4,20 +4,6 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "order_items")
-
-
-/**
- * ORDER ITEMS
- * {
- * "restaurantId": 2,
- * orderItems:[
-     * {"dishId":12,amount:1},
-     * {"dishId":14,amount:1}
- * ]
- * }
- *
- */
-
 public class OrderItemEntity {
 
     @Id
@@ -25,15 +11,14 @@ public class OrderItemEntity {
     private Integer id;
 
     @Column(name = "amount")
-    public Integer amount;
+    private Integer amount;
 
-    // One order item belongs to one dish
     @Column(name = "dish_id")
     private Integer dishId;
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
-    private OrderEntity order = new OrderEntity();
+    private OrderEntity order;
 
     // Getters and setters
     public Integer getId() {
@@ -67,5 +52,5 @@ public class OrderItemEntity {
     public void setOrder(OrderEntity order) {
         this.order = order;
     }
-
 }
+
