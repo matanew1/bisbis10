@@ -14,12 +14,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.List;
 import java.util.Optional;
 
 @Controller
 @RequestMapping(path="/api")
-public class RatingsContoller {
+public class RatingsController {
 
     @Autowired
     private RatingCrud ratingCrud;

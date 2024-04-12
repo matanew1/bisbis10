@@ -3,7 +3,6 @@ package com.att.tdp.bisbis10.controller;
 import com.att.tdp.bisbis10.bondary.OrderBoundary;
 import com.att.tdp.bisbis10.dal.OrderCrud;
 import com.att.tdp.bisbis10.dal.OrderItemCrud;
-import com.att.tdp.bisbis10.dal.RestaurantCrud;
 import com.att.tdp.bisbis10.data.OrderEntity;
 import com.att.tdp.bisbis10.data.OrderItemEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequestMapping(path="/api")
-public class OrderContoller {
+public class OrderController {
 
     @Autowired
     private OrderCrud orderCrud;
