@@ -8,8 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-
 @Controller
 @RequestMapping(path="/api")
 public class RestaurantController {
@@ -18,23 +16,29 @@ public class RestaurantController {
     private RestaurantCrud restaurantCrud;
 
     @GetMapping("/restaurants")
-    public ResponseEntity<Iterable<RestaurantEntity>>  getRestaurantsByCuisine(@RequestParam(required = false) String cuisine) {
-        if (cuisine != null && !cuisine.isEmpty()) {
-            return ResponseEntity.ok(restaurantCrud.findByCuisinesContaining(cuisine));
-        } else {
-            // If cuisine parameter is not provided, return all restaurants
-            return ResponseEntity.ok(restaurantCrud.findAll());
+    public ResponseEntity<?> getRestaurantsByCuisine(@RequestParam(required = false) String cuisine) {
+        try {
+            if (cuisine != null && !cuisine.isEmpty()) {
+                return ResponseEntity.ok(restaurantCrud.findByCuisinesContaining(cuisine));
+            } else {
+                return ResponseEntity.ok(restaurantCrud.findAll());
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @GetMapping("/restaurants/{id}")
-    public ResponseEntity<RestaurantEntity> getRestaurantById(@PathVariable Integer id) {
-        RestaurantEntity restaurant = restaurantCrud.findById(id).orElse(null);
-        if (restaurant == null) {
-            // 404 Not Found
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<?> getRestaurantById(@PathVariable Integer id) {
+        try {
+            RestaurantEntity restaurant = restaurantCrud.findById(id).orElse(null);
+            if (restaurant == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(restaurant);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        return ResponseEntity.ok(restaurant);
     }
 
     @PostMapping(
@@ -42,13 +46,16 @@ public class RestaurantController {
             consumes = "application/json",
             produces = "application/json"
     )
-    public ResponseEntity<RestaurantEntity> addRestaurant(@RequestBody RestaurantEntity restaurant) {
-        if (restaurant == null) {
-            // 400 Bad Request
-            return ResponseEntity.badRequest().build();
+    public ResponseEntity<?> addRestaurant(@RequestBody RestaurantEntity restaurant) {
+        try {
+            if (restaurant == null) {
+                return ResponseEntity.badRequest().build();
+            }
+            RestaurantEntity savedRestaurant = restaurantCrud.save(restaurant);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedRestaurant);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        RestaurantEntity savedRestaurant = restaurantCrud.save(restaurant);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedRestaurant);
     }
 
     @PutMapping(
@@ -56,44 +63,40 @@ public class RestaurantController {
             consumes = "application/json",
             produces = "application/json"
     )
-    public ResponseEntity<RestaurantEntity> updateRestaurant(@PathVariable Integer id, @RequestBody RestaurantEntity restaurant) {
-        if (restaurant == null) {
-            // 400 Bad Request
-            return ResponseEntity.badRequest().build();
+    public ResponseEntity<?> updateRestaurant(@PathVariable Integer id, @RequestBody RestaurantEntity restaurant) {
+        try {
+            if (restaurant == null) {
+                return ResponseEntity.badRequest().build();
+            }
+            RestaurantEntity existingRestaurant = restaurantCrud.findById(id).orElse(null);
+            if (existingRestaurant == null) {
+                return ResponseEntity.notFound().build();
+            }
+            if (restaurant.getName() != null)
+                existingRestaurant.setName(restaurant.getName());
+            if (restaurant.getIsKosher() != null)
+                existingRestaurant.setIsKosher(restaurant.getIsKosher());
+            if (restaurant.getCuisines() != null)
+                existingRestaurant.setCuisines(restaurant.getCuisines());
+
+            RestaurantEntity updatedRestaurant = restaurantCrud.save(existingRestaurant);
+            return ResponseEntity.ok(updatedRestaurant);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        RestaurantEntity existingRestaurant = restaurantCrud.findById(id).orElse(null);
-        if (existingRestaurant == null) {
-            // 404 Not Found
-            return ResponseEntity.notFound().build();
-        }
-        if (restaurant.getName() != null)
-            existingRestaurant.setName(restaurant.getName());
-        else
-            existingRestaurant.setName(existingRestaurant.getName());
-
-        if (restaurant.getIsKosher())
-            existingRestaurant.setIsKosher(restaurant.getIsKosher());
-        else
-            existingRestaurant.setIsKosher(existingRestaurant.getIsKosher());
-
-        if (restaurant.getCuisines() != null)
-            existingRestaurant.setCuisines(restaurant.getCuisines());
-        else
-            existingRestaurant.setCuisines(existingRestaurant.getCuisines());
-
-        RestaurantEntity updatedRestaurant = restaurantCrud.save(existingRestaurant);
-        return ResponseEntity.ok(updatedRestaurant);
     }
 
     @DeleteMapping("/restaurants/{id}")
-    public ResponseEntity<Void> deleteRestaurant(@PathVariable Integer id) {
-        if (!restaurantCrud.existsById(id)) {
-            // 404 Not Found
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<?> deleteRestaurant(@PathVariable Integer id) {
+        try {
+            if (!restaurantCrud.existsById(id)) {
+                return ResponseEntity.notFound().build();
+            }
+            restaurantCrud.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        restaurantCrud.deleteById(id);
-        // 204 No Content
-        return ResponseEntity.noContent().build();
     }
 
 }
