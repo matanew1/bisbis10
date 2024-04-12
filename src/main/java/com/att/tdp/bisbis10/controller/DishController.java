@@ -4,9 +4,9 @@ import com.att.tdp.bisbis10.bondary.DishBoundary;
 import com.att.tdp.bisbis10.dal.DishCrud;
 import com.att.tdp.bisbis10.dal.RestaurantCrud;
 import com.att.tdp.bisbis10.data.DishEntity;
-import com.att.tdp.bisbis10.data.RatingEntity;
 import com.att.tdp.bisbis10.data.RestaurantEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -29,20 +29,23 @@ public class DishController {
             consumes = "application/json",
             produces = "application/json"
     )
-    public ResponseEntity<DishEntity> addDish(@PathVariable("id") Integer restaurantId, @RequestBody DishBoundary dishBoundary) {
-        Optional<RestaurantEntity> restaurant = restaurantCrud.findById(restaurantId);
+    public ResponseEntity<?> addDish(@PathVariable("id") Integer restaurantId, @RequestBody DishBoundary dishBoundary) {
+        try {
+            Optional<RestaurantEntity> restaurant = restaurantCrud.findById(restaurantId);
 
-        if (restaurant.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            if (restaurant.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            DishEntity dish = dishBoundary.toEntity();
+            dish.setRestaurant(restaurant.get());
+
+            dish = dishCrud.save(dish);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(dish);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
-        DishEntity dish = dishBoundary.toEntity();
-        dish.setRestaurant(restaurant.get());
-
-        dish = dishCrud.save(dish);
-
-        return ResponseEntity.ok(dish);
-
     }
 
     @PutMapping(
@@ -50,52 +53,61 @@ public class DishController {
             consumes = "application/json",
             produces = "application/json"
     )
-    public ResponseEntity<DishEntity> updateDish(@PathVariable("restaurantId") Integer restaurantId, @PathVariable("dishId") Integer dishId, @RequestBody DishBoundary dishBoundary) {
-        Optional<DishEntity> dish = dishCrud.findById(dishId);
+    public ResponseEntity<?> updateDish(@PathVariable("restaurantId") Integer restaurantId, @PathVariable("dishId") Integer dishId, @RequestBody DishBoundary dishBoundary) {
+        try {
+            Optional<DishEntity> dish = dishCrud.findById(dishId);
 
-        if (dish.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            if (dish.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            DishEntity dishEntity = dish.get();
+            if (dishBoundary.getName() != null)
+                dishEntity.setName(dishBoundary.getName());
+            if (dishBoundary.getPrice() != null)
+                dishEntity.setPrice(dishBoundary.getPrice());
+            if (dishBoundary.getDescription() != null)
+                dishEntity.setDescription(dishBoundary.getDescription());
+
+            dishEntity = dishCrud.save(dishEntity);
+
+            return ResponseEntity.ok(dishEntity);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
-        DishEntity dishEntity = dish.get();
-        if (dishBoundary.getName() != null)
-            dishEntity.setName(dishBoundary.getName());
-        if (dishBoundary.getPrice() != null)
-            dishEntity.setPrice(dishBoundary.getPrice());
-        if (dishBoundary.getDescription() != null)
-            dishEntity.setDescription(dishBoundary.getDescription());
-
-        dishEntity = dishCrud.save(dishEntity);
-
-        return ResponseEntity.ok(dishEntity);
     }
 
     @DeleteMapping(
             path = "/restaurants/{restaurantId}/dishes/{dishId}"
     )
     public ResponseEntity<Void> deleteDish(@PathVariable("restaurantId") Integer restaurantId, @PathVariable("dishId") Integer dishId) {
-        Optional<DishEntity> dish = dishCrud.findById(dishId);
+        try {
+            Optional<DishEntity> dish = dishCrud.findById(dishId);
 
-        if (dish.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            if (dish.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            dishCrud.delete(dish.get());
+
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
-        dishCrud.delete(dish.get());
-
-        return ResponseEntity.noContent().build();
     }
 
     @GetMapping(
             path = "/restaurants/{id}/dishes",
             produces = "application/json"
     )
-    public ResponseEntity<List<DishEntity>> getDishesByRestaurantId(@PathVariable("id") Integer restaurantId) {
-        Optional<RestaurantEntity> restaurant = restaurantCrud.findById(restaurantId);
+    public ResponseEntity<?> getDishesByRestaurantId(@PathVariable("id") Integer restaurantId) {
+        try {
+            Optional<RestaurantEntity> restaurant = restaurantCrud.findById(restaurantId);
 
-        return restaurant
-                .map(value -> ResponseEntity.ok(value.getDishes()))
-                .orElseGet(() -> ResponseEntity.notFound().build());
-
+            return restaurant.map(value -> ResponseEntity.ok(value.getDishes()))
+                    .orElseGet(() -> ResponseEntity.notFound().build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
-
 }
