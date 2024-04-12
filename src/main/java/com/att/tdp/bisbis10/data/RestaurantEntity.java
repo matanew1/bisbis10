@@ -1,18 +1,22 @@
 package com.att.tdp.bisbis10.data;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
 @Table(name = "restaurants")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class RestaurantEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Column(nullable = false)
     private String name;
 
-    @Column(name = "is_kosher")
+    @Column(name = "is_kosher", nullable = false)
     private boolean isKosher;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -20,10 +24,11 @@ public class RestaurantEntity {
     @Column(name = "cuisine")
     private List<String> cuisines;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
-    @JoinColumn(name = "rating_id")
-    private RatingEntity rating;
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+    private List<RatingEntity> ratings;
+
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+    private List<DishEntity> dishes;
 
     // Getters and setters
     public Integer getId() {
@@ -58,23 +63,21 @@ public class RestaurantEntity {
         this.cuisines = cuisines;
     }
 
-    public RatingEntity getRating() {
-        return rating;
+    public List<RatingEntity> getRatings() {
+        return ratings;
     }
 
-    public void setRating(RatingEntity rating) {
-        this.rating = rating;
+    public void setRatings(List<RatingEntity> ratings) {
+        this.ratings = ratings;
     }
 
-    @Override
-    public String toString() {
-        return "RestaurantEntity{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", isKosher=" + isKosher +
-                ", cuisines=" + cuisines +
-                ", rating=" + rating +
-                '}';
+    public List<DishEntity> getDishes() {
+        return dishes;
     }
+
+    public void setDishes(List<DishEntity> dishes) {
+        this.dishes = dishes;
+    }
+
 
 }

@@ -1,9 +1,8 @@
 package com.att.tdp.bisbis10.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+//@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "restaurant_ratings")
 public class RatingEntity {
@@ -11,8 +10,16 @@ public class RatingEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "rating")
-    private Float rating;
+    @ManyToOne
+    @JoinColumn(name = "restaurant_id", nullable = false)
+    private RestaurantEntity restaurant = new RestaurantEntity();
+
+    @Column(nullable = false)
+    private double rating;
+
+    public RatingEntity() {
+
+    }
 
     // Getters and setters
     public Integer getId() {
@@ -23,12 +30,19 @@ public class RatingEntity {
         this.id = id;
     }
 
+    public RestaurantEntity getRestaurant() {
+        return restaurant;
+    }
 
-    public Float getRating() {
+    public void setRestaurant(RestaurantEntity restaurant) {
+        this.restaurant = restaurant;
+    }
+
+    public double getRating() {
         return rating;
     }
 
-    public void setRating(Float rating) {
+    public void setRating(double rating) {
         this.rating = rating;
     }
 }
