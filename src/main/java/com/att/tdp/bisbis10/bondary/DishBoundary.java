@@ -42,6 +42,7 @@ public class DishBoundary {
         this.price = price;
     }
 
+    // Convert to entity
     public DishEntity toEntity() {
         DishEntity dishEntity = new DishEntity();
         dishEntity.setName(this.name);
