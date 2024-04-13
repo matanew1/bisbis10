@@ -11,13 +11,13 @@ import java.util.List;
 public class RestaurantEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @Column(nullable = false)
     private String name;
 
     @Column(name = "is_kosher", nullable = false)
-    private boolean isKosher;
+    private Boolean isKosher;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "restaurant_cuisines", joinColumns = @JoinColumn(name = "restaurant_id"))
@@ -79,5 +79,16 @@ public class RestaurantEntity {
         this.dishes = dishes;
     }
 
+    @Override
+    public String toString() {
+        return "RestaurantEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", isKosher=" + isKosher +
+                ", cuisines=" + cuisines +
+                ", ratings=" + ratings +
+                ", dishes=" + dishes +
+                '}';
+    }
 
 }

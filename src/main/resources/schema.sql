@@ -56,8 +56,8 @@ CREATE TABLE order_items (
 INSERT INTO restaurants (name, is_kosher) VALUES ('Sushi Place', FALSE);
 INSERT INTO restaurants (name, is_kosher) VALUES ('Falafel Place', TRUE);
 
-INSERT INTO restaurant_cuisines (restaurant_id, cuisine) VALUES (1, 'Japanese');
-INSERT INTO restaurant_cuisines (restaurant_id, cuisine) VALUES (2, 'Middle Eastern');
+INSERT INTO restaurant_cuisines (restaurant_id, cuisine) VALUES (1, 'japanese');
+INSERT INTO restaurant_cuisines (restaurant_id, cuisine) VALUES (2, 'middle eastern');
 
 INSERT INTO restaurant_ratings (restaurant_id, rating) VALUES (1, 4.5);
 INSERT INTO restaurant_ratings (restaurant_id, rating) VALUES (2, 4.0);
