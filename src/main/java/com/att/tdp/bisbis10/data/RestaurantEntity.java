@@ -1,13 +1,23 @@
 package com.att.tdp.bisbis10.data;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import java.util.List;
 
+/*
+    * The RestaurantEntity class represents the restaurant entity in the database.
+    * It is used to map the restaurant table in the database to a Java object.
+    * The class uses JPA annotations to define the mapping between the database table and the Java object.
+    * The class contains the following fields:
+    * - id: The ID of the restaurant.
+    * - name: The name of the restaurant.
+    * - isKosher: A boolean value indicating whether the restaurant is kosher.
+    * - cuisines: A list of cuisines offered by the restaurant.
+    * - ratings: A list of ratings given to the restaurant.
+    * - dishes: A list of dishes offered by the restaurant.
+    * The class also contains the necessary getters and setters for the fields.
+ */
 @Entity
 @Table(name = "restaurants")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class RestaurantEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

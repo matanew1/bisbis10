@@ -1,7 +1,23 @@
 package com.att.tdp.bisbis10.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+/*
+    * The OrderItemEntity class represents an order item entity.
+    * An order item is a dish that is part of an order.
+    * It contains the following properties:
+    * - id: The order item ID
+    * - amount: The amount of the dish
+    * - dishId: The dish ID
+    * - order: The order entity
+    * The class is annotated with JPA annotations to define the mapping with the order_items table in the database.
+    * The order_items table contains the following columns:
+    * - id: The order item ID (primary key)
+    * - amount: The amount of the dish
+    * - dish_id: The dish ID
+    * - order_id: The order ID (foreign key)
+ */
 @Entity
 @Table(name = "order_items")
 public class OrderItemEntity {
@@ -18,6 +34,7 @@ public class OrderItemEntity {
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
+    @JsonIgnore // Ignore the order property during serialization to break the circular reference
     private OrderEntity order;
 
     // Getters and setters
