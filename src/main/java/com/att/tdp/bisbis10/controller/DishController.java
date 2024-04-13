@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Controller
@@ -39,6 +40,10 @@ public class DishController {
     )
     public ResponseEntity<?> addDish(@PathVariable("id") Integer restaurantId, @RequestBody DishBoundary dishBoundary) {
         try {
+            if (dishBoundary.getName() == null || dishBoundary.getPrice() == null || dishBoundary.getDescription() == null) {
+                // Return 400 (Bad Request) if the name or price is missing
+                return ResponseEntity.badRequest().build();
+            }
             // Find the restaurant by ID
             Optional<RestaurantEntity> restaurant = restaurantCrud.findById(restaurantId);
 
@@ -81,6 +86,11 @@ public class DishController {
     )
     public ResponseEntity<?> updateDish(@PathVariable("restaurantId") Integer restaurantId, @PathVariable("dishId") Integer dishId, @RequestBody DishBoundary dishBoundary) {
         try {
+
+            if (dishBoundary.getName() == null && dishBoundary.getPrice() == null && dishBoundary.getDescription() == null) {
+                // Return 400 (Bad Request) if no fields are provided
+                return ResponseEntity.badRequest().build();
+            }
             // Find the dish by ID
             Optional<DishEntity> dish = dishCrud.findById(dishId);
 
@@ -123,19 +133,29 @@ public class DishController {
     )
     public ResponseEntity<Void> deleteDish(@PathVariable("restaurantId") Integer restaurantId, @PathVariable("dishId") Integer dishId) {
         try {
-            // Find the dish by ID
-            Optional<DishEntity> dish = dishCrud.findById(dishId);
+            // Find restaurant by ID
+            Optional<RestaurantEntity> restaurant = restaurantCrud.findById(restaurantId);
 
-            // If the dish is not found, return 404 (Not Found)
-            if (dish.isEmpty()) {
+            // If the restaurant is not found, return 404 (Not Found)
+            if (restaurant.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
 
+            // check if the dish exists in the restaurant
+            if (restaurant.get().getDishes().stream().noneMatch(dish -> Objects.equals(dish.getId(), dishId))) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // delete the dish from the restaurant
+            restaurant.get().getDishes().removeIf(dish -> Objects.equals(dish.getId(), dishId));
+
             // Delete the dish
-            dishCrud.delete(dish.get());
+            dishCrud.deleteById(dishId);
 
             // Return 204 (No Content) if the dish is successfully deleted
             return ResponseEntity.noContent().build();
+
+            // Find dish by ID
         } catch (Exception e) {
             // Return 500 (Internal Server Error) if an unexpected error occurs
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
