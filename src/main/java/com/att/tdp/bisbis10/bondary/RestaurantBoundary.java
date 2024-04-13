@@ -1,8 +1,6 @@
 package com.att.tdp.bisbis10.bondary;
 
 import com.att.tdp.bisbis10.data.RestaurantEntity;
-
-import java.util.ArrayList;
 import java.util.List;
 
 public class RestaurantBoundary {

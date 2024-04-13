@@ -77,3 +77,6 @@ SELECT order_id, amount, dish_id, d.restaurant_id FROM orders
                   INNER JOIN order_items oi on orders.id = oi.order_id
                   INNER JOIN dishes d on oi.dish_id = d.id
                   INNER JOIN restaurants r on orders.restaurant_id = r.id;
+
+select o.id as order_num, restaurant_id, name, is_kosher, name FROM restaurants
+                  JOIN public.orders o on restaurants.id = o.restaurant_id;

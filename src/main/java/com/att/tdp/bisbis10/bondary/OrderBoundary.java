@@ -8,10 +8,10 @@ import java.util.List;
 
 public class OrderBoundary {
 
-    private int restaurantId;
+    private Integer restaurantId;
     private OrderItemBoundary[] orderItems;
 
-    public OrderBoundary(int restaurantId, OrderItemBoundary[] items) {
+    public OrderBoundary(Integer restaurantId, OrderItemBoundary[] items) {
         this.restaurantId = restaurantId;
         this.orderItems = items;
     }
@@ -30,11 +30,11 @@ public class OrderBoundary {
         this.orderItems = orderItems;
     }
 
-    public int getRestaurantId() {
+    public Integer getRestaurantId() {
         return restaurantId;
     }
 
-    public void setRestaurantId(int restaurantId) {
+    public void setRestaurantId(Integer restaurantId) {
         this.restaurantId = restaurantId;
     }
 

@@ -3,8 +3,8 @@ package com.att.tdp.bisbis10.bondary;
 import com.att.tdp.bisbis10.data.OrderItemEntity;
 
 public class OrderItemBoundary {
-    private int amount;
-    private int dishId;
+    private Integer amount;
+    private Integer dishId;
 
     public OrderItemBoundary() {
     }
@@ -14,19 +14,19 @@ public class OrderItemBoundary {
         this.dishId = dishId;
     }
 
-    public int getAmount() {
+    public Integer getAmount() {
         return amount;
     }
 
-    public int getDishId() {
+    public Integer getDishId() {
         return dishId;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(Integer amount) {
         this.amount = amount;
     }
 
-    public void setDishId(int dishId) {
+    public void setDishId(Integer dishId) {
         this.dishId = dishId;
     }
 
