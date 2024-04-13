@@ -25,6 +25,12 @@ public class RatingsController {
     @Autowired
     private RestaurantCrud restaurantCrud;
 
+    /**
+        * Add a new rating
+        *
+        * @param ratingBoundary The rating boundary
+        * @return The response entity ResponseEntity<?> can be any type
+        */
     @PostMapping(
             path = "/ratings",
             consumes = "application/json",
@@ -32,27 +38,52 @@ public class RatingsController {
     )
     public ResponseEntity<?> addNewRating(@RequestBody RatingBoundary ratingBoundary) {
         try {
+
+            // Validate rating boundary
+            if (ratingBoundary == null) {
+                return ResponseEntity.badRequest().body("Invalid rating: must provide a rating.");
+            }
+
+            // Validate rating value and restaurant ID
+            if (ratingBoundary.getRating() == null || ratingBoundary.getRestaurantId() == null) {
+                return ResponseEntity.badRequest().body("Invalid rating: must provide a rating value and a restaurant ID.");
+            }
+
+            // Validate restaurant ID
+            int restaurantId = ratingBoundary.getRestaurantId();
+            if (restaurantId < 1) {
+                return ResponseEntity.badRequest().body("Invalid restaurant ID: must provide a valid restaurant ID.");
+            }
+
             // Validate rating value
-            float ratingValue = ratingBoundary.getRating();
-            if (ratingValue < 0 || ratingValue > 5) {
+            double ratingValue = ratingBoundary.getRating();
+            if (ratingValue < 0 || ratingValue > 5) { // Rating must be between 0 and 5
                 return ResponseEntity.badRequest().body("Invalid rating value: must be between 0 and 5.");
             }
 
             // Find the restaurant
-            Optional<RestaurantEntity> restaurantEntityOptional = restaurantCrud.findById(ratingBoundary.getRestaurantId());
+            Optional<RestaurantEntity> restaurantEntityOptional = restaurantCrud.findById(restaurantId);
+            // Check if the restaurant exists by the provided ID
             if (restaurantEntityOptional.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
 
-            // Create RatingEntity from RatingBoundary
+            // Get the restaurant entity
+            RestaurantEntity restaurantEntity = restaurantEntityOptional.get();
+
+            // Create a new rating entity
             RatingEntity ratingEntity = new RatingEntity();
+            // Set the rating entity properties
+            ratingEntity.setRestaurant(restaurantEntity);
+            // Set the rating value
             ratingEntity.setRating(ratingValue);
-            ratingEntity.setRestaurant(restaurantEntityOptional.get());
 
-            // Save the rating
-            RatingEntity savedRating = ratingCrud.save(ratingEntity);
+            // Save the rating entity
+            ratingCrud.save(ratingEntity);
 
-            return ResponseEntity.ok(savedRating);
+            // Return the response
+            return ResponseEntity.ok().body(ratingEntity);
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add rating: " + e.getMessage());
         }

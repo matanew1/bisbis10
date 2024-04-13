@@ -1,32 +1,32 @@
 package com.att.tdp.bisbis10.bondary;
 
-import com.att.tdp.bisbis10.data.RatingEntity;
-
 public class RatingBoundary {
-    private int restaurantId;
-    private float rating;
+    private Integer restaurantId;
+    private Double rating;
 
     // Getters and setters
-    public int getRestaurantId() {
+    public Integer getRestaurantId() {
         return restaurantId;
     }
 
-    public void setRestaurantId(int restaurantId) {
+    public void setRestaurantId(Integer restaurantId) {
         this.restaurantId = restaurantId;
     }
 
-    public float getRating() {
+    public Double getRating() {
         return rating;
     }
 
-    public void setRating(float rating) {
+    public void setRating(Double rating) {
         this.rating = rating;
     }
 
-    public RatingEntity toEntity() {
-        RatingEntity ratingEntity = new RatingEntity();
-        ratingEntity.getRestaurant().setId(restaurantId);
-        ratingEntity.setRating(rating);
-        return ratingEntity;
+    // toString
+    @Override
+    public String toString() {
+        return "RatingBoundary{" +
+                "restaurantId=" + restaurantId +
+                ", rating=" + rating +
+                '}';
     }
 }

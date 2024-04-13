@@ -15,7 +15,7 @@ public class RatingEntity {
     private RestaurantEntity restaurant = new RestaurantEntity();
 
     @Column(nullable = false)
-    private double rating;
+    private Double rating;
 
     public RatingEntity() {
 
@@ -38,11 +38,11 @@ public class RatingEntity {
         this.restaurant = restaurant;
     }
 
-    public double getRating() {
+    public Double getRating() {
         return rating;
     }
 
-    public void setRating(double rating) {
+    public void setRating(Double rating) {
         this.rating = rating;
     }
 }
